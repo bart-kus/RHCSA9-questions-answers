@@ -21,13 +21,12 @@ PART 0 :                                                                        
 ----------------------------------------------------------------------------------------------------------------------------------------------
 // Most important task : Reset root password //
 1)Reboot and press SHIFT until GRUB MENU comes up
-2)Select 2nd choice after rebooting & Press E 
-3)Type rd.break on the 4th line & cntrl X
-4)mount -o remount, wr /sysroot
-5)chroot /sysroot
-6)passwd
-7)touch /.autorelabel 
-8)exit x2
+2) after rebooting & Press E 
+3)Type on 4th line where "linux" is: init=/bin/bash
+4)mount -o remount,rw /   --write exactly this
+5)passwd root
+6)touch /.autorelabel 
+7)exec /usr/lib/systemd/systemd
 ----------------------------------------------------------------------------------------------------------------------------------------------
 PART 1 :                                                                                                                                      |
 ----------------------------------------------------------------------------------------------------------------------------------------------
@@ -84,9 +83,13 @@ echo $HISTSIZE
 
 
 Exam Scenario : change the HISTSIZE value to 100000 for all system users.
-nano /etc/profile.d/histsize.sh
+sudo vi /etc/profile
+
 	export HISTSIZE=100000000
-source /etc/profile.d/histsize.sh
+sudo vi /etc/profile
+sudo vi /etc/profile
+echo $HISTSIZE
+
 
 3) Finding a file : 
 3.1 Using "Locate" is the best optimal solution to find a certain config file when you don’t know its name or location in the file system
