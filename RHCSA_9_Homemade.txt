@@ -93,16 +93,20 @@ echo $HISTSIZE
 
 3) Finding a file : 
 3.1 Using "Locate" is the best optimal solution to find a certain config file when you don’t know its name or location in the file system
+sudo dnf install mlocate -- install 
+sudo updatedb  -- update, errors if not updated
+ls -l /var/lib/mlocate/mlocate.db -- Verify the mlocate.db exist (without locate wont work)
 locate SERVICE | grep KEYWORD
 locate httpd | grep mail
 
 Using grep : 
 (A) Exam Scenario : 
-1)copy “/etc/passwd” under “/home/tekup/”
-2)create a new file called users containing all lines that ends with bash. 
-cp /etc/passwd /home/tekup
+1)copy “/etc/passwd” under “/home/tekup/”  -- cp /etc/passwd /home/tekup/
+2)create a new file called users containing all lines that ends with bash.  --- touch users
+cp /etc/passwd /home/tekup 
 touch users
-grep bash /etc/passwd >> users
+grep bash$ /etc/passwd >> users  -- explanation grep bash$ will search for lines that end with bash. The $ is used to indicate the end of the line.
+>> users appends the output to the users file.
 
 
 (B) Exam Scenario : 
@@ -125,7 +129,7 @@ find /etc/ -perm 644 -name a* -exec ls -la {} \;
 			-exec ls -l {} \; executes the ls -l command on each found file to display detailed information.
 
 
-Exam Scenario : Trouver tous les fichiers appartenant à l’utilisateur student et qui ont une taille inférieur à 1Ko, puis les copier dans le répertoire /home/consultant1/find
+Exam Scenario : Find all files belonging to the user student that are smaller than 1KB in size, then copy them to the directory /home/consultant1/find
 
 find /home -user student -size -1k -exec cp -a {} /home/consultant1/find  \; 
 
@@ -134,14 +138,25 @@ find /home -user student -size -1k -exec cp -a {} /home/consultant1/find  \;
 
 
 
-Exam Scenario 2 : Copiez /etc/passwd sous le nom « password », remplacer les « : » dans le fichier password par %, puis extraire les champs nom, uid et shell et les sauvegarder dans un fichier nommé /home/consultant1/uid. Afficher par la suite toutes les lignes contenant « /bin/bash » et les sauvegarder dans fichier bash
+Exam Scenario 2 : Copy /etc/passwd under the name "password", replace the ":" characters in the password file with "%", then extract the fields name, uid, and shell and save them in a file named /home/consultant1/uid. Afterward, display all the lines containing /bin/bash and save them in a file named bash.
+# Step 1: Copy /etc/passwd to "password"
 cp /etc/passwd password
-cat password | tr ":" "%" | cut -d% -f1,3,7 > /home/consultant1/uid
-grep /bin/bash /home/consultant1/uid > bash
+
+# Step 2: Replace ":" with "%" in "password"
+sed -i 's/:/%/g' password
+
+# Step 3: Ensure the directory /home/consultant1 exists
+mkdir -p /home/consultant1
+
+# Step 4: Extract name, UID, and shell and save them to /home/consultant1/uid
+awk -F% '{print $1, $3, $7}' password > /home/consultant1/uid
+
+# Step 5: Find lines containing "/bin/bash" and save them to "bash"
+grep '/bin/bash' password > bash
 
 
 
-4) Finding a command file path
+4) Finding a command file path, The which command is used to locate the file path of a command in Linux, showing where the command binary is stored in the system. The which command searches for the executable in the directories listed in the PATH environment variable and returns the full path of the command.
 which passwd :show command file path
 which useradd :show command file path
 
@@ -171,12 +186,26 @@ Result :
 17465756 -rwxr-----. 2 root root  0 Nov  7 23:09 originalFile
 17465757 lrwxrwxrwx. 1 root root 12 Nov  7 23:10 SymbolicLinkFile → originalFile
 
-→ SymbolicLinkFile is not sharing neither the same inode, nor the same permissions. Once the originalFile is deleted, the SymbolicLinkFile will no longer be accessible. (Symbolic link = Shortcut in windows OS)
+→ SymbolicLinkFile is not sharing neither the same inode, nor the same permissions. Once the originalFile is deleted, the SymbolicLinkFile will no longer be accessible. (Symbolic link = Shortcut in windows OS) A symbolic link (also known as a symlink or soft link) is a special type of file that points to another file or directory. The reason it has lrwxrwxrwx (permissions that seem broad) is due to the nature of how symbolic links work, but it’s important to understand that these permissions apply to the link itself, not the target file it points to. The permissions shown for the symbolic link do not affect the access to the target file (i.e., OriginalFile in your case). In your example, the symbolic link (SymbolicLinkFile) points to OriginalFile. Even though SymbolicLinkFile has rwxrwxrwx, the actual access to OriginalFile is controlled by its own permissions, which are rw-r--r--. Symbolic links always have broad permissions (lrwxrwxrwx) because they allow users to access the link itself.
+However, the real control over the file’s access comes from the permissions on the target file (in your case, OriginalFile).
+
+The owner (root) can read and write OriginalFile.
+The group and others can only read it.
+Even though everyone can "access" the symlink, what they can actually do with the target file (OriginalFile) is limited by the target file's permissions
 
 
 2) Archiving + Compression: 
 
-	tar –cvf arch.tar /etc → create archive (without compression)
+| **Compression Tool** | **Command (Compress)**                                          | **Command (Decompress)**                                    | **File Extension**  |
+|----------------------|----------------------------------------------------------------|-------------------------------------------------------------|---------------------|
+| **`tar` + `gzip`**   | `tar -czvf archive.tar.gz /path/to/directory`                  | `tar -xzvf archive.tar.gz`                                   | `.tar.gz`           |
+| **`tar` + `bzip2`**  | `tar -cjvf archive.tar.bz2 /path/to/directory`                 | `tar -xjvf archive.tar.bz2`                                  | `.tar.bz2`          |
+| **`gzip`**           | `gzip filename`                                                | `gunzip filename.gz`                                         | `.gz`               |
+| **`bzip2`**          | `bzip2 filename`                                               | `bunzip2 filename.bz2`                                       | `.bz2`              |
+| **`xz`**             | `xz filename`                                                  | `unxz filename.xz`                                           | `.xz`               |
+| **`zip`**            | `zip archive.zip file1 file2` (or `zip -r archive.zip /dir`)   | `unzip archive.zip`                                          | `.zip`              |
+
+	tar -cvf arch.tar /etc → create archive (without compression)
 	tar -cvfz archive2.tgz /etc/dnf → archive & compression with gzip
 	tar -cvfj archive2.tgz /etc/dnf → archive & compression with bzip2
 	tar –cvfJ arch.tar.xy /etc → compress with XY
