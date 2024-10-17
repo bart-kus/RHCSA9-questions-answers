@@ -245,6 +245,7 @@ su → Switch to user ROOT
 usermod -aG wheel wassim → member of group wheel can use sudo 
 /etc/sudoers → sudoers config file
 /etc/sudoers.d → Add other users sudoers config files: File[1] & File[2] & File[3] & File[4](Examples)
+Additional config files: /etc/sudoers.d/ (e.g., File1, File2, File3, File4)
 
 *File[1] : 
 nano /etc/sudoers.d/lisa
@@ -271,7 +272,7 @@ useradd linda → create uses (with default settings)
 passwd linda → Always specify password after user creation
 
 
-useradd supernova –d /home/superDir –g tekup –G wheel –s /sbin/nologin –u 3004
+useradd supernova -d /home/superDir -g tekup -G wheel -s /sbin/nologin -u 3004 
 		-d : to specify the user’s home directory
 		-g : to specify user’s primary group
 		-G : supplementary groups
@@ -280,6 +281,12 @@ useradd supernova –d /home/superDir –g tekup –G wheel –s /sbin/nologin �
 		/sbin/nologin : this shell prevents interactive login.
 		/bin/sh : It's less feature-rich than Bash but still provides a shell environment.
 		/sbin/bash : full interactive shell login.
+
+we can checj that user can not login:        
+        grep supernova /etc/passwd
+        supernova:x:3004:1250::/home/superDir:/sbin/nologin
+
+To revert change: usermod -s /bin/bash supernova -- -s /bin/bash: This sets the shell to /bin/bash, which allows the user to log in with a standard shell
 
 usermod –L linda → linda is locked
 usermod -U linda → linda is Unlocked 
@@ -290,11 +297,11 @@ chage –d 0 linda : force linda to change the password next time login
 -d set date of last password change to LAST_DAY.
 
 [!] Exam Scenario [!]
-(A) Natasha a comme groupe secondaire exploitations. 
+(A) Natasha has "exploitations" as her secondary group set this group 
 usermod -aG exploitations Natasha
-(B) Blandine ne doit pas pouvoir se logguer dans le système et son compte est inactif. 
-usermod -s /sbin/nologin blandine (/sbin/nologin est un shell innactif [!] Can be found in /etc/passwd [!])
-usermod -L blandine (Compte Innactif == Compte Verouillé)
+(B) Blandine must not be able to log into the system, and her account is inactive. 
+usermod -s /sbin/nologin blandine (/sbin/nologin Is an inactive shell [!] Can be found in /etc/passwd [!])
+usermod -L blandine ("Inactive Account == Locked Account")
 
 
 
